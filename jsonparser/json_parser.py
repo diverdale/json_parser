@@ -46,15 +46,23 @@ class JsonParser:
     def get_json(self):
         return(self.json_obj)
 
+    
     def get_data(self):
-        data = []
-        for x in self.json_obj:
-            for key in self.args:
-                data.append(key + ": " + str(x.get(key)))
-        data_json = [{}]
-        for item in data:
-            key, val = item.split(":", 1)
-            if key in data_json[-1]:
-                data_json.append({})
-            data_json[-1][key] = val
-        return data_json
+        def search_dict(dct, keys_to_search):
+            found = {}
+            for key, value in dct.items():
+                if key in keys_to_search:
+                    found[key] = value
+                if isinstance(value, dict):
+                    found.update(search_dict(value, keys_to_search))
+                elif isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, dict):
+                            found.update(search_dict(item, keys_to_search))
+            return found
+
+        result = []
+        for item in self.json_obj:
+            if isinstance(item, dict):
+                result.append(search_dict(item, self.args))
+        return result

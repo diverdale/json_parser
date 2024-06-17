@@ -1,7 +1,7 @@
 # Dale Wright
 
 # Parse JSON objects by key name
-
+import fnmatch
 class JsonParserException(Exception):
     def __init__(self, msg: str):
         super().__init__(msg)
@@ -51,13 +51,14 @@ class JsonParser:
         def search_dict(dct, keys_to_search):
             found = {}
             for key, value in dct.items():
-                if key in keys_to_search:
-                    if key not in found:
-                        found[key] = value
-                    else:
-                        if not isinstance(found[key], list):
-                            found[key] = [found[key]]
-                        found[key].append(value)
+                for pattern in keys_to_search:
+                    if fnmatch.fnmatch(key, pattern):
+                        if key not in found:
+                            found[key] = value
+                        else:
+                            if not isinstance(found[key], list):
+                                found[key] = [found[key]]
+                            found[key].append(value)
                 if isinstance(value, dict):
                     nested_found = search_dict(value, keys_to_search)
                     for nested_key, nested_value in nested_found.items():

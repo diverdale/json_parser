@@ -3,8 +3,13 @@
         "first_name": "John",
         "last_name": "Doe",
         "full_name": "John Doe",
-        "address": {
+        "address1": {
             "street": "1208 Elm Street",
+            "city": "Springfield",
+            "zip_code": "62704"
+        },
+        "address2": {
+            "street": "4965 Harvest Rd",
             "city": "Springfield",
             "zip_code": "62704"
         },

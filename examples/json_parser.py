@@ -52,14 +52,40 @@ class JsonParser:
             found = {}
             for key, value in dct.items():
                 if key in keys_to_search:
-                    found[key] = value
+                    if key not in found:
+                        found[key] = value
+                    else:
+                        if not isinstance(found[key], list):
+                            found[key] = [found[key]]
+                        found[key].append(value)
                 if isinstance(value, dict):
-                    found.update(search_dict(value, keys_to_search))
+                    nested_found = search_dict(value, keys_to_search)
+                    for nested_key, nested_value in nested_found.items():
+                        if nested_key not in found:
+                            found[nested_key] = nested_value
+                        else:
+                            if not isinstance(found[nested_key], list):
+                                found[nested_key] = [found[nested_key]]
+                            if isinstance(nested_value, list):
+                                found[nested_key].extend(nested_value)
+                            else:
+                                found[nested_key].append(nested_value)
                 elif isinstance(value, list):
                     for item in value:
                         if isinstance(item, dict):
-                            found.update(search_dict(item, keys_to_search))
+                            nested_found = search_dict(item, keys_to_search)
+                            for nested_key, nested_value in nested_found.items():
+                                if nested_key not in found:
+                                    found[nested_key] = nested_value
+                                else:
+                                    if not isinstance(found[nested_key], list):
+                                        found[nested_key] = [found[nested_key]]
+                                    if isinstance(nested_value, list):
+                                        found[nested_key].extend(nested_value)
+                                    else:
+                                        found[nested_key].append(nested_value)
             return found
+
 
         result = []
         for item in self.json_obj:

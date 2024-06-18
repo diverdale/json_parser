@@ -1,25 +1,15 @@
+[tool.poetry]
+name = "json-parser"
+version = "0.0.1"
+description = "Dynamic JSON parser"
+authors = ["dalwrigh <dalwrigh@cisco.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
 [build-system]
-requires = ['setuptools>=42']
-build-backend = 'setuptools.build_meta'
-
-[metadata]
-name = json_parser
-version = 0.0.1
-author = Dale Wright
-author_email = diverdale@gmail.com
-description = Dynamic JSON json parser
-long_description = file: README.md
-url = https://github.com/diverdale/json_parser
-classifiers =
-    Programming Language :: Python :: 3
-    License :: OSI Approved :: MIT License
-    Operating System :: OS Independent
-
-[options]
-package_dir = 
-    = sarc
-packages = find:
-python_requires = >=3.6
-
-[options.packages.find]
-where = src
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

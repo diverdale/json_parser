@@ -1,4 +1,4 @@
-# Python JSON Paarser Library
+# Python JSON Parser Library
 
 [![license]](/LICENSE)
 
@@ -42,7 +42,7 @@ json_data = [
     }
 ]
 
-keys = ['first_name', 'city', 'birthday']
+keys = ['first_name', 'last_name', 'birthday']
 
 data = JsonParser(json_data, keys)
 result = data.get_data()
@@ -53,15 +53,12 @@ print(json.dumps(result, indent=4))
 [
     {
         "first_name": "John",
-        "city": [
-            "Springfield",
-            "Springfield"
-        ],
+        "last_name": "Doe",
         "birthday": "1984-05-23"
     },
     {
         "first_name": "Jane",
-        "city": "Springfield",
+        "last_name": "Smith",
         "birthday": "1990-11-12"
     }
 ]

@@ -31,7 +31,7 @@ json_data = [
     }
 ]
 
-keys = ['first_name', 'street', 'birthday']
+keys = ['first_name', 'last_name', 'birthday']
 
 data = JsonParser(json_data, keys)
 result = data.get_data()

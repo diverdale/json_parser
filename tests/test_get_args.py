@@ -18,8 +18,8 @@ json_data = [
         },
         "address2": {
             "street": "4965 Harvest Rd",
-            "city": "Springfield",
-            "zip_code": "62704"
+            "city": "Boston",
+            "zip_code": "12345"
         },
         "birthday": "1984-05-23"
     }
@@ -38,4 +38,11 @@ def test_get_args():
     data = JsonParser(json_data, keys)
     result = data.get_args()
     assert result == ['first_name', 'last_name']
+
+def test_dupe_keys():
+    keys = ['street']
+
+    data = JsonParser(json_data, keys)
+    result = data.get_data()
+    assert (len(result[0]['street'])) == 2
 

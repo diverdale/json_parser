@@ -1,12 +1,33 @@
-# Python JSON Parser Library
+# json_parser
 
-[![license]](/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](/LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 
-json_parser is a JSON parser library.
+A lightweight Python library for extracting specific keys from complex, nested JSON structures. Rather than manually traversing deeply nested objects, `json_parser` lets you declare the keys you care about and recursively retrieves their values — with support for wildcard matching and automatic merging of duplicate keys.
 
-In json_parser, you can easily traverse large JSON objects and pick out the information that you need.
+## Features
 
-## Usage
+- **Key-based extraction** — Specify the keys you need and let the parser handle the traversal.
+- **Wildcard matching** — Use glob-style patterns (e.g., `address*`) to match multiple keys at once.
+- **Recursive search** — Automatically searches through nested dictionaries and lists.
+- **Duplicate key merging** — When the same key appears at multiple levels, values are combined into a list.
+- **Zero dependencies** — Uses only the Python standard library.
+
+## Installation
+
+```bash
+pip install json-parser
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/diverdale/json_parser.git
+cd json_parser
+pip install .
+```
+
+## Quick Start
 
 ```python
 import json
@@ -42,12 +63,13 @@ json_data = [
     }
 ]
 
-keys = ['first_name', 'last_name', 'birthday']
+keys = ["first_name", "last_name", "birthday"]
 
-data = JsonParser(json_data, keys)
-result = data.get_data()
+result = JsonParser(json_data, keys).get_data()
 print(json.dumps(result, indent=4))
 ```
+
+**Output:**
 
 ```json
 [
@@ -64,13 +86,16 @@ print(json.dumps(result, indent=4))
 ]
 ```
 
-## Wildcards
-Using the same code but chaning the keys to include wildcards
+## Wildcard Matching
+
+Use glob-style patterns to match keys dynamically. For example, `address*` matches `address`, `address1`, and `address2`:
 
 ```python
-keys = ['first_name', 'address*', 'birthday']
+keys = ["first_name", "address*", "birthday"]
+result = JsonParser(json_data, keys).get_data()
 ```
-will get anything matching address (address, address1 and address2 in this case)
+
+**Output:**
 
 ```json
 [
@@ -100,13 +125,16 @@ will get anything matching address (address, address1 and address2 in this case)
 ]
 ```
 
-## Duplicate Keys
-Duplicate keys will be combined into a sigle json element. 
+## Duplicate Key Merging
+
+When the same key is found at multiple nesting levels within a single record, the values are automatically combined into a list:
 
 ```python
-keys = ['first_name', 'street', 'birthday']
+keys = ["first_name", "street", "birthday"]
+result = JsonParser(json_data, keys).get_data()
 ```
-Changing keys to include street will return the following:
+
+**Output:**
 
 ```json
 [
@@ -126,7 +154,31 @@ Changing keys to include street will return the following:
 ]
 ```
 
+## API Reference
 
+### `JsonParser(obj, args)`
 
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `obj` | `list[dict]` | A list of JSON objects (dicts) to search. |
+| `args` | `list[str]` | Key names or glob patterns to extract. |
 
+Raises `JsonParserException` if `obj` or `args` is empty.
 
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `get_data()` | `list[dict]` | Extracts and returns matching key-value pairs from each record. |
+| `get_json()` | `list[dict]` | Returns the original JSON input. |
+| `get_args()` | `list[str]` | Returns the list of keys/patterns. |
+
+## Running Tests
+
+```bash
+pytest tests/
+```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.

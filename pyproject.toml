@@ -1,14 +1,22 @@
 [tool.poetry]
-name = "json-parser"
+name = "json-key-parser"
 version = "0.0.1"
-description = "Dynamic JSON parser"
-authors = ["dalwrigh <dalwrigh@cisco.com>"]
+description = "Extract specific keys from JSON objects with recursive search and wildcard matching"
+authors = ["Dale Wright <diverdale@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/diverdale/json_parser"
+repository = "https://github.com/diverdale/json_parser"
+keywords = ["json", "parser", "key", "extract", "search"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+packages = [{include = "json_parser", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-
 
 [build-system]
 requires = ["poetry-core"]

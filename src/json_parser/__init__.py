@@ -71,6 +71,7 @@ class JsonParser:
         current_depth: int = 1,
         max_depth: Optional[int] = None,
         path: bool = False,
+        case_sensitive: bool = True,
     ) -> dict:
         """Recursively search dct for matching keys.
 
@@ -81,6 +82,8 @@ class JsonParser:
             current_depth: Current recursion depth (1 = top level of input dict).
             max_depth: Maximum depth to search. None means unlimited.
             path: If True, wrap matched values as {"value": ..., "path": "..."}.
+            case_sensitive: If False, key matching is case-insensitive (both sides lowercased
+                            for comparison; output key always uses original JSON casing).
 
         Returns:
             Dict of matched keys to their values (or path-wrapped values).
@@ -108,10 +111,14 @@ class JsonParser:
 
             # Check if this key matches any search pattern
             for pattern in keys_to_search:
-                if fnmatch.fnmatch(key, pattern):
+                if case_sensitive:
+                    matched = fnmatch.fnmatch(key, pattern)
+                else:
+                    matched = fnmatch.fnmatch(key.lower(), pattern.lower())
+                if matched:
                     matched_value = {"value": value, "path": full_path} if path else value
                     _merge(found, key, matched_value)
-                    break  # a key only needs to match once per pattern set
+                    break  # a key only needs to match once per pattern set (also prevents case-variant query key duplication)
 
             # Recurse into nested dict (depth increases)
             if isinstance(value, dict):
@@ -123,6 +130,7 @@ class JsonParser:
                         current_depth=current_depth + 1,
                         max_depth=max_depth,
                         path=path,
+                        case_sensitive=case_sensitive,
                     )
                     for nested_key, nested_value in nested_found.items():
                         _merge(found, nested_key, nested_value)
@@ -139,13 +147,14 @@ class JsonParser:
                                 current_depth=current_depth,
                                 max_depth=max_depth,
                                 path=path,
+                                case_sensitive=case_sensitive,
                             )
                             for nested_key, nested_value in nested_found.items():
                                 _merge(found, nested_key, nested_value)
 
         return found
 
-    def get_data(self, path: bool = False, max_depth: Optional[int] = None) -> List[Any]:
+    def get_data(self, path: bool = False, max_depth: Optional[int] = None, case_sensitive: bool = True) -> List[Any]:
         """Return extracted keys from the JSON object.
 
         Args:
@@ -154,6 +163,9 @@ class JsonParser:
             max_depth: Maximum nesting depth to search. None (default) searches all levels.
                        1 = top-level keys only, 2 = one level of nesting, etc.
                        0 = return empty dict for every input item.
+            case_sensitive: If False, key matching ignores capitalization (both key and pattern are
+                            lowercased for comparison; output keys always use original JSON casing).
+                            Default True preserves exact-match behavior for all existing callers.
 
         Returns:
             List with one dict per input item, containing matched keys and their values.
@@ -169,11 +181,12 @@ class JsonParser:
                         current_depth=1,
                         max_depth=max_depth,
                         path=path,
+                        case_sensitive=case_sensitive,
                     )
                 )
         return result
 
 
-def parse(obj: Union[str, dict, list], keys: List[str], path: bool = False, max_depth: Optional[int] = None) -> List[Any]:
-    """One-liner convenience function. Equivalent to JsonParser(obj, keys).get_data(path=path, max_depth=max_depth)."""
-    return JsonParser(obj, keys).get_data(path=path, max_depth=max_depth)
+def parse(obj: Union[str, dict, list], keys: List[str], path: bool = False, max_depth: Optional[int] = None, case_sensitive: bool = True) -> List[Any]:
+    """One-liner convenience function. Equivalent to JsonParser(obj, keys).get_data(path=path, max_depth=max_depth, case_sensitive=case_sensitive)."""
+    return JsonParser(obj, keys).get_data(path=path, max_depth=max_depth, case_sensitive=case_sensitive)

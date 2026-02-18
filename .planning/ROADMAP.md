@@ -12,7 +12,7 @@ Starting from a working prototype, this roadmap takes json-key-parser from an un
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Docs and Ergonomics** - Write the README and expand the input API so the library is immediately usable
+- [x] **Phase 1: Docs and Ergonomics** - Write the README and expand the input API so the library is immediately usable (completed 2026-02-18)
 - [ ] **Phase 2: Power Features** - Add path tracking, depth limiting, and case-insensitive matching
 - [ ] **Phase 3: Quality and Ship** - Achieve 90%+ test coverage and polish the PyPI package page
 
@@ -61,6 +61,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Docs and Ergonomics | 0/2 | Not started | - |
+| 1. Docs and Ergonomics | 0/2 | Complete    | 2026-02-18 |
 | 2. Power Features | 0/TBD | Not started | - |
 | 3. Quality and Ship | 0/TBD | Not started | - |

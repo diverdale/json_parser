@@ -56,7 +56,11 @@ Plans:
   1. Running `pytest --cov` reports 90% or higher coverage, including empty input, deeply nested structures, no-match cases, and all error paths
   2. The PyPI package page at pypi.org/project/json-key-parser displays the full README as the long description
   3. The PyPI page lists Python 3.8-3.12 classifiers, relevant topic classifiers, and searchable keywords so the package appears in relevant searches
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Comprehensive test suite: close 10 uncovered lines to 90%+ coverage (TDD)
+- [ ] 03-02-PLAN.md — PyPI metadata polish: v0.1.0, full classifiers, keywords, fresh build artifacts
 
 ## Progress
 

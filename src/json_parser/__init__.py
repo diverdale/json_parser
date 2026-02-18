@@ -3,7 +3,7 @@
 # Parse JSON objects by key name
 import fnmatch
 import json
-from typing import Union, List, Any
+from typing import Union, List, Any, Optional
 
 
 class JsonParserException(Exception):
@@ -26,7 +26,7 @@ class JsonParser:
         get_json(self):
             returns the JSON object
 
-        get_data(self):
+        get_data(self, path=False, max_depth=None):
             returns the parsed JSON data
     """
 
@@ -63,53 +63,117 @@ class JsonParser:
     def get_json(self):
         return(self.json_obj)
 
-    def get_data(self):
-        def search_dict(dct, keys_to_search):
-            found = {}
-            for key, value in dct.items():
-                for pattern in keys_to_search:
-                    if fnmatch.fnmatch(key, pattern):
-                        if key not in found:
-                            found[key] = value
-                        else:
-                            if not isinstance(found[key], list):
-                                found[key] = [found[key]]
-                            found[key].append(value)
-                if isinstance(value, dict):
-                    nested_found = search_dict(value, keys_to_search)
+    def _search_dict(
+        self,
+        dct: dict,
+        keys_to_search: List[str],
+        current_path: str = "",
+        current_depth: int = 1,
+        max_depth: Optional[int] = None,
+        path: bool = False,
+    ) -> dict:
+        """Recursively search dct for matching keys.
+
+        Args:
+            dct: The dict to search.
+            keys_to_search: List of key patterns (fnmatch-compatible).
+            current_path: Dot-notation path accumulated so far.
+            current_depth: Current recursion depth (1 = top level of input dict).
+            max_depth: Maximum depth to search. None means unlimited.
+            path: If True, wrap matched values as {"value": ..., "path": "..."}.
+
+        Returns:
+            Dict of matched keys to their values (or path-wrapped values).
+        """
+        # max_depth=0 means no recursion at all — return immediately
+        if max_depth is not None and max_depth == 0:
+            return {}
+
+        found = {}
+
+        def _merge(found: dict, key: str, value: Any) -> None:
+            """Merge a new value for key into found, building lists on duplicates."""
+            if key not in found:
+                found[key] = value
+            else:
+                if not isinstance(found[key], list):
+                    found[key] = [found[key]]
+                if isinstance(value, list):
+                    found[key].extend(value)
+                else:
+                    found[key].append(value)
+
+        for key, value in dct.items():
+            full_path = f"{current_path}.{key}" if current_path else key
+
+            # Check if this key matches any search pattern
+            for pattern in keys_to_search:
+                if fnmatch.fnmatch(key, pattern):
+                    matched_value = {"value": value, "path": full_path} if path else value
+                    _merge(found, key, matched_value)
+                    break  # a key only needs to match once per pattern set
+
+            # Recurse into nested dict (depth increases)
+            if isinstance(value, dict):
+                if max_depth is None or current_depth < max_depth:
+                    nested_found = self._search_dict(
+                        value,
+                        keys_to_search,
+                        current_path=full_path,
+                        current_depth=current_depth + 1,
+                        max_depth=max_depth,
+                        path=path,
+                    )
                     for nested_key, nested_value in nested_found.items():
-                        if nested_key not in found:
-                            found[nested_key] = nested_value
-                        else:
-                            if not isinstance(found[nested_key], list):
-                                found[nested_key] = [found[nested_key]]
-                            if isinstance(nested_value, list):
-                                found[nested_key].extend(nested_value)
-                            else:
-                                found[nested_key].append(nested_value)
-                elif isinstance(value, list):
+                        _merge(found, nested_key, nested_value)
+
+            # Recurse into list items (lists are transparent — depth does NOT increase)
+            elif isinstance(value, list):
+                if max_depth is None or current_depth < max_depth:
                     for item in value:
                         if isinstance(item, dict):
-                            nested_found = search_dict(item, keys_to_search)
+                            nested_found = self._search_dict(
+                                item,
+                                keys_to_search,
+                                current_path=full_path,
+                                current_depth=current_depth,
+                                max_depth=max_depth,
+                                path=path,
+                            )
                             for nested_key, nested_value in nested_found.items():
-                                if nested_key not in found:
-                                    found[nested_key] = nested_value
-                                else:
-                                    if not isinstance(found[nested_key], list):
-                                        found[nested_key] = [found[nested_key]]
-                                    if isinstance(nested_value, list):
-                                        found[nested_key].extend(nested_value)
-                                    else:
-                                        found[nested_key].append(nested_value)
-            return found
+                                _merge(found, nested_key, nested_value)
 
+        return found
+
+    def get_data(self, path: bool = False, max_depth: Optional[int] = None) -> List[Any]:
+        """Return extracted keys from the JSON object.
+
+        Args:
+            path: If True, each matched value is wrapped as {"value": ..., "path": "dot.notation.path"}.
+                  Default False preserves original bare-value behavior.
+            max_depth: Maximum nesting depth to search. None (default) searches all levels.
+                       1 = top-level keys only, 2 = one level of nesting, etc.
+                       0 = return empty dict for every input item.
+
+        Returns:
+            List with one dict per input item, containing matched keys and their values.
+        """
         result = []
         for item in self.json_obj:
             if isinstance(item, dict):
-                result.append(search_dict(item, self.args))
+                result.append(
+                    self._search_dict(
+                        item,
+                        self.args,
+                        current_path="",
+                        current_depth=1,
+                        max_depth=max_depth,
+                        path=path,
+                    )
+                )
         return result
 
 
-def parse(obj: Union[str, dict, list], keys: List[str]) -> List[Any]:
-    """One-liner convenience function. Equivalent to JsonParser(obj, keys).get_data()."""
-    return JsonParser(obj, keys).get_data()
+def parse(obj: Union[str, dict, list], keys: List[str], path: bool = False, max_depth: Optional[int] = None) -> List[Any]:
+    """One-liner convenience function. Equivalent to JsonParser(obj, keys).get_data(path=path, max_depth=max_depth)."""
+    return JsonParser(obj, keys).get_data(path=path, max_depth=max_depth)

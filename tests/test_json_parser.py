@@ -231,9 +231,11 @@ def test_triple_duplicate_key_merge():
     assert len(result[0]["street"]) == 3
 
 def test_extend_branch_when_nested_returns_list():
-    """extend() branch fires when a nested search already returns a list of matches."""
-    # zone_a yields [street: ['1st Ave', '2nd Ave']], zone_b yields [street: ['3rd Ave', '4th Ave']]
-    # merging a list into an existing list triggers extend() (line 105)
+    """extend() branch fires when a nested search already returns a list of matches.
+
+    zone_a merges to street=['1st Ave', '2nd Ave']; zone_b then merges its own
+    list ['3rd Ave', '4th Ave'] via extend() — producing a flat 4-element list.
+    """
     data = [{
         "zone_a": {"address1": {"street": "1st Ave"}, "address2": {"street": "2nd Ave"}},
         "zone_b": {"address3": {"street": "3rd Ave"}, "address4": {"street": "4th Ave"}},

@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Any Python developer can extract any key from any JSON structure in one line — without writing nested loops, try/excepts, or custom traversal code.
-**Current focus:** Phase 2 - Power Features
+**Current focus:** Phase 2 complete — ready for Phase 3 (Packaging)
 
 ## Current Position
 
-Phase: 2 of 3 (Power Features)
-Plan: 1 of 1 complete in current phase
-Status: In progress
-Last activity: 2026-02-18 — Plan 02-01 (path tracking + depth limiting) complete
+Phase: 2 of 3 (Power Features) — COMPLETE
+Plan: 2 of 2 complete in current phase
+Status: Phase complete
+Last activity: 2026-02-18 — Plan 02-02 (case-insensitive key matching) complete
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 2 min
-- Total execution time: 0.07 hours
+- Total plans completed: 4
+- Average duration: 1.5 min
+- Total execution time: 0.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-docs-and-ergonomics | 2 | 3 min | ~2 min |
-| 02-power-features | 1 | 2 min | 2 min |
+| 02-power-features | 2 | 3 min | ~1.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-01 (2 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-01 (2 min), 02-02 (1 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -53,6 +53,10 @@ Recent decisions affecting current work:
 - [02-01]: Lists transparent to depth counting — only descending into a dict increments depth
 - [02-01]: path=True wraps each match as {value, path} dict; duplicate keys produce list of path-value dicts
 - [02-01]: max_depth=0 handled with early return to return empty dict immediately
+- [02-02]: case_sensitive=True default — zero behavior change for all existing callers
+- [02-02]: Lowercase both sides for fnmatch comparison — symmetric and correct for wildcard patterns
+- [02-02]: Break-after-first-match prevents case-variant query key duplication (e.g. ['city', 'City'] produces one result)
+- [02-02]: Output key always uses original JSON casing — naturally preserved, no extra logic needed
 
 ### Pending Todos
 
@@ -65,5 +69,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 02-01-PLAN.md (path tracking + depth limiting). _search_dict() extracted, FEAT-01 and FEAT-02 implemented and tested.
+Stopped at: Completed 02-02-PLAN.md (case-insensitive key matching). FEAT-03 implemented and tested. Phase 02-power-features complete.
 Resume file: None

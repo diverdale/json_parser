@@ -1,72 +1,27 @@
-# json_parser
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](/LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/json-key-parser.svg)](https://pypi.org/project/json-key-parser/)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](/LICENSE)
 
-A lightweight Python library for extracting specific keys from complex, nested JSON structures. Rather than manually traversing deeply nested objects, `json_parser` lets you declare the keys you care about and recursively retrieves their values — with support for wildcard matching and automatic merging of duplicate keys.
+# json-key-parser
 
-## Features
-
-- **Key-based extraction** — Specify the keys you need and let the parser handle the traversal.
-- **Wildcard matching** — Use glob-style patterns (e.g., `address*`) to match multiple keys at once.
-- **Recursive search** — Automatically searches through nested dictionaries and lists.
-- **Duplicate key merging** — When the same key appears at multiple levels, values are combined into a list.
-- **Zero dependencies** — Uses only the Python standard library.
-
-## Installation
-
-```bash
-pip install json-parser
-```
-
-Or install from source:
-
-```bash
-git clone https://github.com/diverdale/json_parser.git
-cd json_parser
-pip install .
-```
+You know the pattern. You get a response back from an API and you need three fields buried
+inside it. So you write `response['data'][0]['user']['address']['city']`, wrap it in a
+try/except because some records have the key and some don't, repeat for the next field, and
+suddenly you have twenty lines of boilerplate for what should be a one-liner.
+`json-key-parser` lets you declare the keys you want and hands them back — no traversal
+code, no try/excepts, no nested loops.
 
 ## Quick Start
 
 ```python
-import json
 from json_parser import JsonParser
 
-json_data = [
-    {
-        "first_name": "John",
-        "last_name": "Doe",
-        "full_name": "John Doe",
-        "address1": {
-            "street": "1208 Elm Street",
-            "city": "Springfield",
-            "zip_code": "62704"
-        },
-        "address2": {
-            "street": "4965 Harvest Rd",
-            "city": "Springfield",
-            "zip_code": "62704"
-        },
-        "birthday": "1984-05-23"
-    },
-    {
-        "first_name": "Jane",
-        "last_name": "Smith",
-        "full_name": "Jane Smith",
-        "address": {
-            "street": "742 Evergreen Terrace",
-            "city": "Springfield",
-            "zip_code": "62701"
-        },
-        "birthday": "1990-11-12"
-    }
-]
+data = [{"first_name": "Alice", "last_name": "Smith", "birthday": "1990-04-15",
+         "address": {"street": "12 Oak Ave", "city": "Portland", "zip": "97201"}},
+        {"first_name": "Bob", "last_name": "Jones", "birthday": "1985-09-30",
+         "address": {"street": "88 Pine St", "city": "Seattle", "zip": "98101"}}]
 
-keys = ["first_name", "last_name", "birthday"]
-
-result = JsonParser(json_data, keys).get_data()
-print(json.dumps(result, indent=4))
+result = JsonParser(data, ["first_name", "last_name", "birthday"]).get_data()
 ```
 
 **Output:**
@@ -74,25 +29,32 @@ print(json.dumps(result, indent=4))
 ```json
 [
     {
-        "first_name": "John",
-        "last_name": "Doe",
-        "birthday": "1984-05-23"
+        "first_name": "Alice",
+        "last_name": "Smith",
+        "birthday": "1990-04-15"
     },
     {
-        "first_name": "Jane",
-        "last_name": "Smith",
-        "birthday": "1990-11-12"
+        "first_name": "Bob",
+        "last_name": "Jones",
+        "birthday": "1985-09-30"
     }
 ]
 ```
+
+## Why json-key-parser?
+
+- **Declare keys, skip the traversal** — one call replaces nested loops across every record
+- **Wildcard patterns** — `address*` matches `address`, `address1`, `address2`, and any other variation
+- **Duplicate values merged automatically** — no deduplication code needed when a key appears at multiple levels
+- **Works at any nesting depth** — one level or ten, it finds the keys you asked for
+- **Zero dependencies** — pure Python stdlib, nothing to pin or audit
 
 ## Wildcard Matching
 
-Use glob-style patterns to match keys dynamically. For example, `address*` matches `address`, `address1`, and `address2`:
+Using the same data from above, `address*` matches any key that starts with `address`:
 
 ```python
-keys = ["first_name", "address*", "birthday"]
-result = JsonParser(json_data, keys).get_data()
+result = JsonParser(data, ["address*"]).get_data()
 ```
 
 **Output:**
@@ -100,38 +62,45 @@ result = JsonParser(json_data, keys).get_data()
 ```json
 [
     {
-        "first_name": "John",
-        "address1": {
-            "street": "1208 Elm Street",
-            "city": "Springfield",
-            "zip_code": "62704"
-        },
-        "address2": {
-            "street": "4965 Harvest Rd",
-            "city": "Springfield",
-            "zip_code": "62704"
-        },
-        "birthday": "1984-05-23"
+        "address": {
+            "street": "12 Oak Ave",
+            "city": "Portland",
+            "zip": "97201"
+        }
     },
     {
-        "first_name": "Jane",
         "address": {
-            "street": "742 Evergreen Terrace",
-            "city": "Springfield",
-            "zip_code": "62701"
-        },
-        "birthday": "1990-11-12"
+            "street": "88 Pine St",
+            "city": "Seattle",
+            "zip": "98101"
+        }
     }
 ]
 ```
+
+This is especially useful when records are inconsistently structured — one record might have
+`address`, another `address1` and `address2`. The pattern catches all of them without
+needing to know which variant each record uses.
 
 ## Duplicate Key Merging
 
-When the same key is found at multiple nesting levels within a single record, the values are automatically combined into a list:
+When the same key appears at more than one nesting level inside a single record, the values
+are automatically combined into a list. No deduplication code required.
 
 ```python
-keys = ["first_name", "street", "birthday"]
-result = JsonParser(json_data, keys).get_data()
+contacts = [
+    {
+        "first_name": "Alice",
+        "address1": {"street": "12 Oak Ave", "city": "Portland"},
+        "address2": {"street": "99 River Rd", "city": "Portland"}
+    },
+    {
+        "first_name": "Bob",
+        "address": {"street": "88 Pine St", "city": "Seattle"}
+    }
+]
+
+result = JsonParser(contacts, ["first_name", "street"]).get_data()
 ```
 
 **Output:**
@@ -139,46 +108,29 @@ result = JsonParser(json_data, keys).get_data()
 ```json
 [
     {
-        "first_name": "John",
+        "first_name": "Alice",
         "street": [
-            "1208 Elm Street",
-            "4965 Harvest Rd"
-        ],
-        "birthday": "1984-05-23"
+            "12 Oak Ave",
+            "99 River Rd"
+        ]
     },
     {
-        "first_name": "Jane",
-        "street": "742 Evergreen Terrace",
-        "birthday": "1990-11-12"
+        "first_name": "Bob",
+        "street": "88 Pine St"
     }
 ]
 ```
 
-## API Reference
+Alice has two addresses, so `street` becomes a list of both values. Bob has one address, so
+`street` stays a plain string. The shape matches the data — you don't have to handle it
+yourself.
 
-### `JsonParser(obj, args)`
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `obj` | `list[dict]` | A list of JSON objects (dicts) to search. |
-| `args` | `list[str]` | Key names or glob patterns to extract. |
-
-Raises `JsonParserException` if `obj` or `args` is empty.
-
-#### Methods
-
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `get_data()` | `list[dict]` | Extracts and returns matching key-value pairs from each record. |
-| `get_json()` | `list[dict]` | Returns the original JSON input. |
-| `get_args()` | `list[str]` | Returns the list of keys/patterns. |
-
-## Running Tests
+## Installation
 
 ```bash
-pytest tests/
+pip install json-key-parser
 ```
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.
+MIT. See the [LICENSE](/LICENSE) file for details.

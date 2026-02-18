@@ -2,6 +2,10 @@
 
 # Parse JSON objects by key name
 import fnmatch
+import json
+from typing import Union, List, Any
+
+
 class JsonParserException(Exception):
     def __init__(self, msg: str):
         super().__init__(msg)
@@ -25,8 +29,21 @@ class JsonParser:
         get_data(self):
             returns the parsed JSON data
     """
-    
-    def __init__(self, obj, args):
+
+    def __init__(self, obj: Union[str, dict, list], args: List[str]):
+
+        # API-01: If obj is a raw JSON string, parse it first
+        if isinstance(obj, str):
+            try:
+                obj = json.loads(obj)
+            except json.JSONDecodeError as e:
+                raise JsonParserException(
+                    msg=f"Invalid JSON string: {e}"
+                )
+
+        # API-02: If obj is a single dict (after possible string parsing), wrap it in a list
+        if isinstance(obj, dict):
+            obj = [obj]
 
         if not obj:
             raise JsonParserException(
@@ -42,11 +59,10 @@ class JsonParser:
 
     def get_args(self):
         return(self.args)
-    
+
     def get_json(self):
         return(self.json_obj)
 
-    
     def get_data(self):
         def search_dict(dct, keys_to_search):
             found = {}
@@ -87,9 +103,13 @@ class JsonParser:
                                         found[nested_key].append(nested_value)
             return found
 
-
         result = []
         for item in self.json_obj:
             if isinstance(item, dict):
                 result.append(search_dict(item, self.args))
         return result
+
+
+def parse(obj: Union[str, dict, list], keys: List[str]) -> List[Any]:
+    """One-liner convenience function. Equivalent to JsonParser(obj, keys).get_data()."""
+    return JsonParser(obj, keys).get_data()

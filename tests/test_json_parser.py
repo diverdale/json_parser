@@ -192,3 +192,61 @@ def test_case_insensitive_output_key_is_json_casing():
     result = JsonParser(data, ['mykey']).get_data(case_sensitive=False)
     assert 'MyKey' in result[0]
     assert 'mykey' not in result[0]
+
+
+# --- Coverage gap tests ---
+
+# --- Error paths ---
+
+def test_empty_list_raises():
+    """Empty list input raises JsonParserException."""
+    with pytest.raises(JsonParserException):
+        JsonParser([], ['key'])
+
+def test_empty_dict_raises():
+    """Empty dict input (falsy after list-wrap) raises JsonParserException."""
+    with pytest.raises(JsonParserException):
+        JsonParser({}, ['key'])
+
+def test_empty_args_raises():
+    """Empty keys list raises JsonParserException."""
+    with pytest.raises(JsonParserException):
+        JsonParser([{"name": "Alice"}], [])
+
+# --- get_json() accessor ---
+
+def test_get_json():
+    """get_json() returns the stored (possibly normalized) JSON object."""
+    data = [{"name": "Alice"}]
+    jp = JsonParser(data, ["name"])
+    assert jp.get_json() == data
+
+# --- Triple duplicate key extend() branch ---
+
+def test_triple_duplicate_key_merge():
+    """Three occurrences of the same key merge into a flat list (extend branch)."""
+    data = [{"a": {"street": "1st Ave"}, "b": {"street": "2nd Ave"}, "c": {"street": "3rd Ave"}}]
+    result = JsonParser(data, ["street"]).get_data()
+    assert isinstance(result[0]["street"], list)
+    assert len(result[0]["street"]) == 3
+
+# --- List recursion under max_depth ---
+
+def test_list_items_searched_under_max_depth():
+    """list-valued keys are recursed into when max_depth allows."""
+    data = [{"contacts": [{"email": "a@b.com"}, {"email": "c@d.com"}]}]
+    result = JsonParser(data, ["email"]).get_data(max_depth=2)
+    assert "email" in result[0]
+
+def test_list_items_not_searched_beyond_max_depth():
+    """list-valued keys are NOT recursed into when max_depth blocks them."""
+    data = [{"contacts": [{"email": "a@b.com"}]}]
+    result = JsonParser(data, ["email"]).get_data(max_depth=1)
+    assert "email" not in result[0]
+
+# --- No-match case ---
+
+def test_no_matching_key_returns_empty():
+    """Key that does not exist anywhere returns empty dict for that item."""
+    result = JsonParser([{"name": "Alice"}], ["missing_key"]).get_data()
+    assert result[0] == {}

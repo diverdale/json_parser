@@ -42,7 +42,11 @@ Plans:
   1. A developer can pass `path=True` (or equivalent) to `get_data()` and receive dot-notation paths alongside each matched value (e.g. `address1.street`)
   2. A developer can pass `max_depth=2` to limit recursion and verify that keys beyond that depth are not returned
   3. A developer can pass `case_sensitive=False` and match keys regardless of their capitalization in the source JSON
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Refactor search_dict + implement path tracking (FEAT-01) and depth limiting (FEAT-02) via TDD
+- [ ] 02-02-PLAN.md — Implement case-insensitive key matching (FEAT-03) via TDD
 
 ### Phase 3: Quality and Ship
 **Goal**: The library has a professional test suite and a PyPI page that accurately represents its capabilities

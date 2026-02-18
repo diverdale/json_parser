@@ -92,3 +92,54 @@ def test_parse_function_string():
     """parse() with a JSON string returns correct results."""
     result = parse(json.dumps([{"name": "Alice"}]), ["name"])
     assert result == [{"name": "Alice"}]
+
+
+# --- FEAT-01: Path tracking ---
+
+def test_path_tracking_top_level():
+    # first_name is at top level — path is just the key itself
+    result = JsonParser(json_data, ['first_name']).get_data(path=True)
+    assert result[0]['first_name'] == {"value": "John", "path": "first_name"}
+
+def test_path_tracking_nested():
+    # city appears inside address1 and address2
+    result = JsonParser(json_data, ['city']).get_data(path=True)
+    matches = result[0]['city']
+    # Should be a list of two path-value dicts
+    assert isinstance(matches, list)
+    assert len(matches) == 2
+    paths = {m['path'] for m in matches}
+    assert paths == {"address1.city", "address2.city"}
+
+def test_path_tracking_false_default():
+    # path=False (default) must return bare values — no regression
+    result = JsonParser(json_data, ['first_name']).get_data()
+    assert result[0]['first_name'] == "John"
+
+
+# --- FEAT-02: Depth limiting ---
+
+def test_max_depth_none_default():
+    # Default (max_depth=None) still finds nested keys
+    result = JsonParser(json_data, ['city']).get_data()
+    assert 'city' in result[0]
+
+def test_max_depth_1_excludes_nested():
+    # city lives inside address1/address2 (depth 2) — should NOT be found at max_depth=1
+    result = JsonParser(json_data, ['city']).get_data(max_depth=1)
+    assert 'city' not in result[0]
+
+def test_max_depth_1_includes_top_level():
+    # first_name is at depth 1 (top level) — should be found
+    result = JsonParser(json_data, ['first_name']).get_data(max_depth=1)
+    assert result[0]['first_name'] == "John"
+
+def test_max_depth_2_includes_nested():
+    # city is at depth 2 (inside address1) — should be found at max_depth=2
+    result = JsonParser(json_data, ['city']).get_data(max_depth=2)
+    assert 'city' in result[0]
+
+def test_max_depth_0_returns_empty():
+    # max_depth=0 means no keys at all — nothing at depth 0 (only at depth 1+)
+    result = JsonParser(json_data, ['first_name']).get_data(max_depth=0)
+    assert result[0] == {}

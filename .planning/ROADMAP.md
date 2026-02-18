@@ -28,7 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A developer can pass a raw JSON string directly to JsonParser without pre-parsing it
   4. A developer can pass a single dict (not wrapped in a list) to JsonParser and get results
   5. A developer can call `json_parser.parse(data, keys)` as a one-liner without instantiating the class
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Rewrite README with problem hook, badges, quick-start, and inline real-world examples
+- [ ] 01-02-PLAN.md — Expand JsonParser to accept JSON strings, single dicts, and add module-level parse() via TDD
 
 ### Phase 2: Power Features
 **Goal**: Users can control how the search runs — depth, case sensitivity — and discover where in the structure their matches came from
@@ -57,6 +61,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Docs and Ergonomics | 0/TBD | Not started | - |
+| 1. Docs and Ergonomics | 0/2 | Not started | - |
 | 2. Power Features | 0/TBD | Not started | - |
 | 3. Quality and Ship | 0/TBD | Not started | - |

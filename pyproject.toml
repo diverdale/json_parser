@@ -1,17 +1,26 @@
 [tool.poetry]
 name = "json-key-parser"
-version = "0.0.1"
-description = "Extract specific keys from JSON objects with recursive search and wildcard matching"
+version = "0.1.0"
+description = "Extract specific keys from deeply nested JSON structures with wildcards and zero dependencies"
 authors = ["Dale Wright <diverdale@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/diverdale/json_parser"
 repository = "https://github.com/diverdale/json_parser"
-keywords = ["json", "parser", "key", "extract", "search"]
+keywords = ["json", "parser", "key", "extract", "search", "nested", "recursive", "wildcard", "fnmatch", "api", "data", "query"]
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
 ]
 packages = [{include = "json_parser", from = "src"}]
 

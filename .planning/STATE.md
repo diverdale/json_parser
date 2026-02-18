@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Any Python developer can extract any key from any JSON structure in one line — without writing nested loops, try/excepts, or custom traversal code.
-**Current focus:** Phase 2 complete — ready for Phase 3 (Packaging)
+**Current focus:** Phase 3 in progress — Plan 03-02 complete (package metadata + build)
 
 ## Current Position
 
-Phase: 2 of 3 (Power Features) — COMPLETE
-Plan: 2 of 2 complete in current phase
-Status: Phase complete
-Last activity: 2026-02-18 — Plan 02-02 (case-insensitive key matching) complete
+Phase: 3 of 3 (Quality and Ship) — In Progress
+Plan: 2 of 3 complete in current phase
+Status: In progress
+Last activity: 2026-02-18 — Plan 03-02 (pyproject.toml v0.1.0 metadata + poetry build) complete
 
-Progress: [████░░░░░░] 40%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 1.5 min
+- Total plans completed: 6
+- Average duration: 1.3 min
 - Total execution time: 0.1 hours
 
 **By Phase:**
@@ -29,9 +29,10 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 01-docs-and-ergonomics | 2 | 3 min | ~2 min |
 | 02-power-features | 2 | 3 min | ~1.5 min |
+| 03-quality-and-ship | 2 | 2 min | ~1 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (1 min), 02-01 (2 min), 02-02 (1 min)
+- Last 5 plans: 01-02 (1 min), 02-01 (2 min), 02-02 (1 min), 03-01 (~1 min), 03-02 (1 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -57,6 +58,9 @@ Recent decisions affecting current work:
 - [02-02]: Lowercase both sides for fnmatch comparison — symmetric and correct for wildcard patterns
 - [02-02]: Break-after-first-match prevents case-variant query key duplication (e.g. ['city', 'City'] produces one result)
 - [02-02]: Output key always uses original JSON casing — naturally preserved, no extra logic needed
+- [03-02]: Version 0.1.0 (not 0.0.3) to signal public beta readiness on PyPI
+- [03-02]: dist/ artifacts are gitignored — v0.1.0 wheel and sdist are untracked build outputs
+- [03-02]: poetry publish NOT triggered — developer runs manually when satisfied
 
 ### Pending Todos
 
@@ -65,9 +69,10 @@ None yet.
 ### Blockers/Concerns
 
 - `args` parameter name (should be `keys`) — backward-compat constraint means rename must be additive
+- `test_empty_dict_raises` is a pre-existing RED-phase TDD test from 03-01 awaiting GREEN implementation
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 02-02-PLAN.md (case-insensitive key matching). FEAT-03 implemented and tested. Phase 02-power-features complete.
+Stopped at: Completed 03-02-PLAN.md (pyproject.toml v0.1.0 metadata + poetry build). QUAL-02 implemented. dist/ cleaned and rebuilt.
 Resume file: None

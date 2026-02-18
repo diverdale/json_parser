@@ -143,3 +143,52 @@ def test_max_depth_0_returns_empty():
     # max_depth=0 means no keys at all — nothing at depth 0 (only at depth 1+)
     result = JsonParser(json_data, ['first_name']).get_data(max_depth=0)
     assert result[0] == {}
+
+
+# --- FEAT-03: Case-insensitive key matching ---
+
+def test_case_insensitive_exact_key():
+    # JSON has "first_name" (lowercase); query uses "First_Name" (mixed)
+    result = JsonParser(json_data, ['First_Name']).get_data(case_sensitive=False)
+    assert result[0].get('first_name') == "John"
+
+def test_case_insensitive_all_caps_query():
+    # Query key in all-caps, JSON key in lowercase
+    result = JsonParser(json_data, ['CITY']).get_data(case_sensitive=False)
+    assert 'city' in result[0]
+
+def test_case_sensitive_default_no_match():
+    # Default case_sensitive=True — mismatched casing should NOT match
+    result = JsonParser(json_data, ['First_Name']).get_data()
+    assert 'first_name' not in result[0]
+    assert 'First_Name' not in result[0]
+
+def test_case_insensitive_wildcard():
+    # Pattern "address*" with case_sensitive=False should match "Address1", "ADDRESS2", etc.
+    data = [{"Address1": {"street": "Main St"}, "address2": {"street": "Oak Ave"}}]
+    result = JsonParser(data, ['address*']).get_data(case_sensitive=False)
+    # Both "Address1" and "address2" match "address*" case-insensitively
+    matched_keys = set(result[0].keys())
+    assert 'Address1' in matched_keys or 'address2' in matched_keys
+    assert len(matched_keys) == 2
+
+def test_case_insensitive_wildcard_uppercase_pattern():
+    # Pattern in uppercase, JSON keys in mixed/lower case
+    data = [{"address1": {"street": "Main St"}, "ADDRESS2": {"street": "Oak Ave"}}]
+    result = JsonParser(data, ['ADDRESS*']).get_data(case_sensitive=False)
+    matched_keys = set(result[0].keys())
+    assert len(matched_keys) == 2
+
+def test_case_insensitive_dedup_query_keys():
+    # Query has ["city", "City"] — with case_sensitive=False, should produce only ONE result key
+    result = JsonParser(json_data, ['city', 'City']).get_data(case_sensitive=False)
+    # Both 'city' and 'City' as output keys should NOT both appear
+    city_count = sum(1 for k in result[0] if k.lower() == 'city')
+    assert city_count == 1
+
+def test_case_insensitive_output_key_is_json_casing():
+    # Output key should use the original JSON key casing, not the query key casing
+    data = [{"MyKey": "value"}]
+    result = JsonParser(data, ['mykey']).get_data(case_sensitive=False)
+    assert 'MyKey' in result[0]
+    assert 'mykey' not in result[0]

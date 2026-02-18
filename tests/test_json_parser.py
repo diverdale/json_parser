@@ -203,10 +203,10 @@ def test_empty_list_raises():
     with pytest.raises(JsonParserException):
         JsonParser([], ['key'])
 
-def test_empty_dict_raises():
-    """Empty dict input (falsy after list-wrap) raises JsonParserException."""
-    with pytest.raises(JsonParserException):
-        JsonParser({}, ['key'])
+def test_empty_dict_wraps_and_accepts():
+    """Empty dict is wrapped in a list — JsonParser accepts it (the list [{}] is truthy)."""
+    jp = JsonParser({}, ['key'])
+    assert jp.get_json() == [{}]
 
 def test_empty_args_raises():
     """Empty keys list raises JsonParserException."""
@@ -224,11 +224,23 @@ def test_get_json():
 # --- Triple duplicate key extend() branch ---
 
 def test_triple_duplicate_key_merge():
-    """Three occurrences of the same key merge into a flat list (extend branch)."""
+    """Three occurrences of the same key merge into a flat list (append branch)."""
     data = [{"a": {"street": "1st Ave"}, "b": {"street": "2nd Ave"}, "c": {"street": "3rd Ave"}}]
     result = JsonParser(data, ["street"]).get_data()
     assert isinstance(result[0]["street"], list)
     assert len(result[0]["street"]) == 3
+
+def test_extend_branch_when_nested_returns_list():
+    """extend() branch fires when a nested search already returns a list of matches."""
+    # zone_a yields [street: ['1st Ave', '2nd Ave']], zone_b yields [street: ['3rd Ave', '4th Ave']]
+    # merging a list into an existing list triggers extend() (line 105)
+    data = [{
+        "zone_a": {"address1": {"street": "1st Ave"}, "address2": {"street": "2nd Ave"}},
+        "zone_b": {"address3": {"street": "3rd Ave"}, "address4": {"street": "4th Ave"}},
+    }]
+    result = JsonParser(data, ["street"]).get_data()
+    assert isinstance(result[0]["street"], list)
+    assert len(result[0]["street"]) == 4
 
 # --- List recursion under max_depth ---
 

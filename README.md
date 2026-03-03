@@ -1,6 +1,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/json-key-parser.svg)](https://pypi.org/project/json-key-parser/)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](/LICENSE)
+[![PyPI Downloads](https://pypistats.com/api/badges/json-key-parser)](https://pypistats.com/packages/json-key-parser)
 
 # json-key-parser
 
